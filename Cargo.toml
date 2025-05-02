@@ -1,0 +1,11 @@
+[package]
+name = "learn"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aes-gcm = "0.10.3"
+base64 = "0.22.1"
+concat-kdf = "0.1.0"
+rfd = "0.15.3"
+sha2 = "0.10.9"

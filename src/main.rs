@@ -7,7 +7,7 @@ use utils::{
 
 fn main() -> () {
     FormCli::new()
-        .add_option("Chiffrer un fichier".to_string(), encrypt_file)
-        .add_option("Déchiffrer un fichier".to_string(), decrypt_file)
+        .add_option("Chiffrer un fichier", encrypt_file)
+        .add_option("Déchiffrer un fichier", decrypt_file)
         .run();
 }

@@ -5,8 +5,8 @@ pub struct FormCli {
 }
 
 impl FormCli {
-    pub fn add_option(&mut self, name: String, action: fn()) -> &mut FormCli {
-        self.options.push((name, action));
+    pub fn add_option(&mut self, name: &str, action: fn()) -> &mut FormCli {
+        self.options.push((name.to_string(), action));
         return self;
     }
 

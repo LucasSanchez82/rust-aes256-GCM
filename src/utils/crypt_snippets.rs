@@ -6,11 +6,16 @@ use aes_gcm::{
 use rfd::FileDialog;
 use sha2::digest::{consts::U12, generic_array::GenericArray};
 
-pub fn encrypt_file() {
-    let passphrase = ask("Enter a passphrase: ").trim().to_string();
+pub fn ask_cipher() -> Aes256Gcm {
+    let passphrase = ask("Chosissez une passphrase :").trim().to_string();
     let key: Key<Aes256Gcm> = generate_key_from_passphrase(passphrase);
-
     let cipher = Aes256Gcm::new(&key);
+
+    return cipher;
+}
+
+pub fn encrypt_file() {
+    let cipher = ask_cipher();
 
     let file_path = FileDialog::new()
         .set_directory("./")
@@ -18,10 +23,8 @@ pub fn encrypt_file() {
         .pick_file();
 
     if let Some(file_path) = file_path {
-        let file = std::fs::read_to_string(&file_path).expect("Failed to read the file");
-        let (nonce, encrypted_file) = encrypt_aes_cgm(&cipher, file.as_ref());
-        println!("File content: {:?}", file);
-        println!("Encrypted file: {:?}", encrypted_file);
+        let file = std::fs::read(&file_path).expect("Failed to read the file");
+        let (nonce, encrypted_file) = encrypt_aes_gcm(&cipher, file.as_ref());
 
         let file_name = file_path
             .file_name()
@@ -58,8 +61,7 @@ pub fn decrypt_file() {
         let file_nonce = std::fs::read(&nonce_file_path).expect("Failed to read the nonce file");
         let file_nonce = Nonce::from_slice(&file_nonce);
 
-        let decrypted_file = decrypt_aes_cgm(&cipher, &file_nonce, &encrypted_file);
-        println!("Decrypted file content: {:?}", decrypted_file);
+        let decrypted_file = decrypt_aes_gcm(&cipher, &file_nonce, &encrypted_file);
 
         let decrypted_file_name = encrypted_file_path
             .file_stem()
@@ -81,21 +83,23 @@ pub fn generate_key_from_passphrase(passphrase: String) -> Key<Aes256Gcm> {
     return Key::<Aes256Gcm>::from_slice(&key).clone();
 }
 
-pub fn encrypt_aes_cgm(cipher: &Aes256Gcm, text: &str) -> (GenericArray<u8, U12>, Vec<u8>) {
+pub fn encrypt_aes_gcm(cipher: &Aes256Gcm, content: &Vec<u8>) -> (GenericArray<u8, U12>, Vec<u8>) {
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng); // 96-bits; unique per message
-    let ciphertext = cipher
-        .encrypt(&nonce, text.as_ref())
+    let crypted = cipher
+        .encrypt(&nonce, content.as_ref())
         .expect("Encryption failure!");
-    (nonce, ciphertext)
+    (nonce, crypted)
 }
 
-pub fn decrypt_aes_cgm(
+pub fn decrypt_aes_gcm(
     cipher: &Aes256Gcm,
     nonce: &GenericArray<u8, U12>,
-    text: &Vec<u8>,
-) -> String {
-    let plaintext = cipher
-        .decrypt(nonce, text.as_ref())
+    content: &Vec<u8>,
+) -> Vec<u8> {
+    println!("Content: {:?}", content);
+    println!("Nonce: {:?}", nonce);
+    let decrypted = cipher
+        .decrypt(nonce, content.as_ref())
         .expect("Decryption failure!");
-    String::from_utf8_lossy(&plaintext).to_string()
+    decrypted
 }

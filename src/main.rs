@@ -1,16 +1,13 @@
 mod utils;
 
-use utils::common::ask;
-use utils::crypt_snippets::{decrypt_file, encrypt_file};
-fn main() -> () {
-    println!("Choose an option:");
-    println!("1. Encrypt a file");
-    println!("2. Decrypt a file");
-    let choice = ask("Enter your choice (1 or 2): ").trim().to_string();
+use utils::{
+    crypt_snippets::{decrypt_file, encrypt_file},
+    form_cli::FormCli,
+};
 
-    match choice.as_str() {
-        "1" => encrypt_file(),
-        "2" => decrypt_file(),
-        _ => println!("Invalid choice. Please restart the program and choose 1 or 2."),
-    }
+fn main() -> () {
+    FormCli::new()
+        .add_option("Chiffrer un fichier".to_string(), encrypt_file)
+        .add_option("Déchiffrer un fichier".to_string(), decrypt_file)
+        .run();
 }
